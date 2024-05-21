@@ -1,206 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Sales Data Visualization</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* styles.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f4f4;
+}
+
+.container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 20px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+h2 {
+    margin-top: 40px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
+}
+
+    </style>
 </head>
-<style>
-    body,
-    html {
-        height: 100%;
-        margin: 0;
-        font-family: 'Arial', sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: linear-gradient(135deg, #74ABE2, #5563DE);
-    }
-
-    .container {
-        text-align: center;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        /* width: 60%; */
-        /* 调整容器的宽度，使其更宽 */
-        max-width: 800px;
-        /* 增加最大宽度 */
-    }
-
-    h1 {
-        color: #333;
-    }
-
-    table {
-        width: 100%;
-        /* 确保表格宽度充满容器 */
-        margin-top: 20px;
-        border-collapse: collapse;
-    }
-
-    th,
-    td {
-        text-align: left;
-        padding: 8px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    th {
-        background-color: #5563DE;
-        color: white;
-    }
-
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-
-    button {
-        background-color: #5563DE;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background-color 0.3s;
-    }
-
-    button:hover {
-        background-color: #4053B2;
-    }
-
-    button:active {
-        transform: scale(0.98);
-    }
-</style>
-
 <body>
     <div class="container">
-        <img src="https://img.shoplineapp.com/media/image_clips/65e6d8b576a4f600201de671/original.png?1709627573">
-        <h1>2024龍年新春福袋幸運抽獎</h1>
-        <table id="prize-table">
-            <thead>
-                <tr>
-                    <th>獎項</th>
-                    <th>獲獎者</th>
-                    <th>電話號碼</th>
-                </tr>
-            </thead>
-            <button id="draw-button">點擊抽獎</button>
-            <tbody>
-                <!-- 奖项和获奖者将动态插入这里 -->
-            </tbody>
-        </table>
-
+        <h1>Sales Data Visualization</h1>
+        
+        <h2>Sales and Orders Trend</h2>
+        <canvas id="trendChart"></canvas>
+        
+        <h2>Product Sales Comparison</h2>
+        <canvas id="comparisonChart"></canvas>
+        
+        <h2>April Sales Composition</h2>
+        <canvas id="compositionChart"></canvas>
     </div>
+    
     <script src="script.js"></script>
-
-
     <script>
-        const API_KEY = 'AIzaSyA2CEVGVWVdni0RcBgfQ0NYljYXPpm9Dgc'; // 请确保这是有效的API密钥
-        const SPREADSHEET_ID = '1t5Evhlpjz5O6TRyYoGXhOk8OMbO_maj_MpV17hlUzIs';
-        const RANGE = '工作表1!A:B'; // 從A欄到B欄
-        let participants = [];
-        let prizeIndex = 0;
+        // scripts.js
+document.addEventListener('DOMContentLoaded', function () {
+    // Sales and Orders Trend Data
+    const trendData = {
+        labels: ['4/6-4/20', '5/6-5/20'],
+        datasets: [
+            {
+                label: 'Total Sales',
+                data: [165440, 147420],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 1
+            },
+            {
+                label: 'Total Orders',
+                data: [69, 58],
+                borderColor: 'rgba(153, 102, 255, 1)',
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderWidth: 1
+            }
+        ]
+    };
 
-        const prizes = [
-            "Dyson吹風機 HD15",
-            "Dyson吹風機 HD15",
-            "小米掃拖機器人S10",
-            "Apple Watch SE",
-            "Philips 飛利浦智慧萬用電鍋",
-            "AirTag+鑰匙圈",
-            "10,000元搭車金",
-            "3,000元搭車金",
-            "700元搭車金"
-        ];
+    // Product Sales Comparison Data
+    const comparisonData = {
+        labels: [
+            '訂閱3500元全時段搭車金',
+            '訂閱40元搭車金大禮包（日）',
+            '訂閱40元搭車金大禮包（夜）',
+            '訂閱70元搭車金大禮包（日）',
+            '訂閱70元搭車金大禮包（夜）',
+            '訂閱全時段120元搭車金（20張）',
+            '訂閱全時段120元搭車金（25張）',
+            '訂閱全時段120元搭車金（5張）',
+            '訂閱全時段40元搭車金（20張）',
+            '訂閱全時段40元搭車金（5張）',
+            '訂閱全時段85元搭車金（20張）',
+            '70元面額訂閱日夜搭車金大禮包'
+        ],
+        datasets: [
+            {
+                label: 'April Sales',
+                data: [73500, 22680, 7560, 26040, 8680, 9600, 0, 600, 9600, 600, 5100, 0],
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'May Sales',
+                data: [77000, 10080, 5040, 13020, 6510, 14400, 12000, 1800, 4000, 0, 3400, 2170],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }
+        ]
+    };
 
-        document.getElementById('draw-button').addEventListener('click', function () {
-            if (prizeIndex >= prizes.length) {
-                const restart = confirm("確定要重新抽獎?");
-                if (restart) {
-                    resetDraw();
+    // April Sales Composition Data
+    const compositionData = {
+        labels: [
+            '訂閱3500元全時段搭車金',
+            '訂閱40元搭車金大禮包（日）',
+            '訂閱40元搭車金大禮包（夜）',
+            '訂閱70元搭車金大禮包（日）',
+            '訂閱70元搭車金大禮包（夜）',
+            '訂閱全時段120元搭車金（20張）',
+            '訂閱全時段120元搭車金（5張）',
+            '訂閱全時段40元搭車金（20張）',
+            '訂閱全時段40元搭車金（5張）',
+            '訂閱全時段85元搭車金（20張）'
+        ],
+        datasets: [
+            {
+                data: [73500, 22680, 7560, 26040, 8680, 9600, 600, 9600, 600, 5100],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)',
+                    'rgba(199, 199, 199, 0.2)',
+                    'rgba(83, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)',
+                    'rgba(75, 192, 192, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(83, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 1
+            }
+        ]
+    };
+
+    // Trend Chart
+    const ctxTrend = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctxTrend, {
+        type: 'line',
+        data: trendData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Sales and Orders Trend'
                 }
-            } else {
-                // 修改这里，仅当参与者列表为空时才重新获取参与者，以避免重复获取
-                if (participants.length === 0) {
-                    fetchParticipants();
-                } else {
-                    drawSinglePrize();
-                }
             }
-        });
-
-        function fetchParticipants() {
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}?key=${API_KEY}`;
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.values) {
-                        // 確保參與者包括名字和電話號碼
-                        participants = data.values; // 不再需要flat()，因為我們希望保留名字和電話號碼的陣列
-                        if (participants.length > 0) {
-                            drawSinglePrize(); // 在加載參與者後立即抽獎
-                        }
-                    } else {
-                        console.error('No data found in the spreadsheet.');
-                    }
-                })
-                .catch(error => console.error('Error fetching data:', error));
         }
+    });
 
-
-
-        function drawSinglePrize() {
-            if (participants.length === 0) {
-                alert("参加者名单为空，无法进行抽奖。");
-                return;
-            }
-            const winnerIndex = Math.floor(Math.random() * participants.length);
-            const winner = participants.splice(winnerIndex, 1)[0]; // winner現在是一個包含名字和電話的陣列
-            if (prizeIndex < prizes.length) {
-                const prizeContainer = document.getElementById('prize-table').getElementsByTagName('tbody')[0];
-                const row = prizeContainer.insertRow();
-                const cell1 = row.insertCell(0);
-                const cell2 = row.insertCell(1);
-                const cell3 = row.insertCell(2); // 新增一個單元格顯示電話號碼
-                cell1.innerHTML = prizes[prizeIndex];
-                cell2.innerHTML = winner[0]; // 名字
-                cell3.innerHTML = winner[1]; // 電話號碼
-                prizeIndex++;
-
-                // 检查是否已经抽到最后一个奖项
-                if (prizeIndex == prizes.length) {
-                    updateDrawButton(true); // 抽奖完成后更新按钮
+    // Comparison Chart
+    const ctxComparison = document.getElementById('comparisonChart').getContext('2d');
+    new Chart(ctxComparison, {
+        type: 'bar',
+        data: comparisonData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Product Sales Comparison'
                 }
             }
         }
+    });
 
-
-        function updateDrawButton(isFinished) {
-            const button = document.getElementById('draw-button');
-            if (isFinished) {
-                button.textContent = '重新抽獎'; // 更新按钮文字
-                button.style.backgroundColor = '#D9534F'; // 更新按钮颜色
-            } else {
-                button.textContent = '點擊抽獎'; // 重置按钮文字
-                button.style.backgroundColor = '#5563DE'; // 重置按钮颜色
+    // Composition Chart
+    const ctxComposition = document.getElementById('compositionChart').getContext('2d');
+    new Chart(ctxComposition, {
+        type: 'pie',
+        data: compositionData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'April Sales Composition'
+                }
             }
         }
-
-        function resetDraw() {
-            document.getElementById('prize-table').getElementsByTagName('tbody')[0].innerHTML = '';
-            prizeIndex = 0;
-            participants = []; // 重置参与者列表，确保重新获取
-            updateDrawButton(false); // 重置按钮状态
-        }
-
-
+    });
+});
     </script>
-
 </body>
-
 </html>
